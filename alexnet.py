@@ -4,6 +4,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.utils.data.sampler import SubsetRandomSampler
+import matplotlib.pyplot as plt
+from datetime import datetime
 
 
 def get_train_valid_loader(
@@ -120,7 +122,21 @@ def get_test_loader(
     return data_loader
 
 
-#     Finally, our last layer outputs 10 neurons which are our final predictions for the 10 classes of objects
+def plot_training(train_losses, valid_losses, valid_accuracies):
+    plt.figure(figsize=(12, 9))
+    plt.subplot(2, 1, 1)
+    plt.xlabel('epoch')
+    plt.plot(train_losses, label='train_loss')
+    plt.plot(valid_losses, label='valid_loss')
+    plt.legend()
+
+    plt.subplot(2, 1, 2)
+    plt.xlabel('epoch')
+    plt.plot(valid_accuracies, label='valid accuracy')
+    plt.legend()
+    # plt.show()
+    plt.savefig(f'plot_training_{datetime.now()}.png')
+
 
 class AlexNet(nn.Module):
     """
@@ -256,16 +272,18 @@ if __name__ == '__main__':
             print('Accuracy of the network on the {} validation images: {} %'.format(5000, 100 * correct / total))
 
         # валидация получившейся модели на test_loader
-        with torch.no_grad():
-            correct = 0
-            total = 0
-            for images, labels in test_loader:
-                images = images.to(device)
-                labels = labels.to(device)
-                outputs = model(images)
-                _, predicted = torch.max(outputs.data, 1)
-                total += labels.size(0)
-                correct += (predicted == labels).sum().item()
-                del images, labels, outputs
+        # with torch.no_grad():
+        #     correct = 0
+        #     total = 0
+        #     for images, labels in test_loader:
+        #         images = images.to(device)
+        #         labels = labels.to(device)
+        #         outputs = model(images)
+        #         _, predicted = torch.max(outputs.data, 1)
+        #         total += labels.size(0)
+        #         correct += (predicted == labels).sum().item()
+        #         del images, labels, outputs
+        #
+        #     print('Accuracy of the network on the {} test images: {} %'.format(5000, 100 * correct / total))
 
-            print('Accuracy of the network on the {} test images: {} %'.format(5000, 100 * correct / total))
+    torch.save(model.state_dict(), './model')
